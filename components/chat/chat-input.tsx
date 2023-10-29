@@ -7,8 +7,10 @@ import axios from 'axios';
 
 import { Form, FormControl, FormField, FormItem } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
-import { Plus, Smile } from 'lucide-react';
+import { Plus } from 'lucide-react';
 import { useModal } from '@/hooks/use-modal-store';
+import { EmojiPicker } from '@/components/emoji-picker';
+import { useRouter } from 'next/navigation';
 
 interface ChatInputProps {
     apiUrl: string;
@@ -23,6 +25,7 @@ const formSchema = z.object({
 
 export const ChatInput = ({ apiUrl, query, name, type }: ChatInputProps) => {
     const { onOpen } = useModal();
+    const router = useRouter();
 
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
@@ -39,6 +42,8 @@ export const ChatInput = ({ apiUrl, query, name, type }: ChatInputProps) => {
                 `${apiUrl}?channelId=${query.channelId}&serverId=${query.serverId}`,
                 values
             );
+            form.reset();
+            router.refresh();
         } catch (error) {
             console.log(error);
         }
@@ -46,7 +51,7 @@ export const ChatInput = ({ apiUrl, query, name, type }: ChatInputProps) => {
 
     return (
         <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)}>
+            <form onSubmit={form.handleSubmit(onSubmit)} autoComplete="off">
                 <FormField
                     control={form.control}
                     name="content"
@@ -77,7 +82,13 @@ export const ChatInput = ({ apiUrl, query, name, type }: ChatInputProps) => {
                                         className="px-14 py-6 bg-zinc-200/90 dark:bg-zinc-700/75 border-none border-0 focus-visible:ring-0 focus-visible:ring-offset-0 text-zinc-600 dark:text-zinc-200"
                                     />
                                     <div className="absolute top-7 right-8">
-                                        <Smile />
+                                        <EmojiPicker
+                                            onChange={(emoji: string) =>
+                                                field.onChange(
+                                                    `${field.value}${emoji}`
+                                                )
+                                            }
+                                        />
                                     </div>
                                 </div>
                             </FormControl>
